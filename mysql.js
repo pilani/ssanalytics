@@ -24,7 +24,7 @@ connection.connect(function(err)
 
 	});
 
-var gds = connection.query('SELECT boaccount from gds_operator where gdsoperator = 1 and exceptionalGdsOperator = 1', function(err, rows){
+var gds = connection.query('SELECT source,destination,boAccount from gds_routesdata', function(err, rows){
 	console.log(err);
 		if(err)
 		{
@@ -64,7 +64,7 @@ function writeToSSADb(gds)
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 
-var schema = mongoose.Schema({ boaccount: 'string' });
+var schema = mongoose.Schema({ source: 'string' , destination: 'string' ,boaccount: 'string' });
 var Event = mongoose.model('gdsOperators', schema);
 
 
