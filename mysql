@@ -1,0 +1,8 @@
+var mysql = require('mysql');
+console.log(mysql);
+var connection = mysql.createConnection({
+  host     : 'jdbc:mysql://ss-db-staging.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com/sstru1',
+  user     : 'ss_master_user',
+  password : 'BackupInstance456',
+});
+console.log(connection);

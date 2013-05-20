@@ -12,6 +12,7 @@ console.log(sDdj);
 req.get(formUrl(sDdj.srcid,sDdj.destid,sDdj.doj), function(err,res,body) {
 data = JSON.parse(formValidJson(res.toJSON()['body']));
 routes = data['data'];
+console.log("data"+data);
 console.log("got resp "+sDdj)
 ds.logRbRoutes(routes,callback);
 
