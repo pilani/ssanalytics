@@ -6,6 +6,12 @@ m_names = new Array("January", "February", "March",
 "October", "November", "December"),rb=require('./rb.js'),async=require('async');
 
 
+
+function orchestrate(){
+
+	async.waterfall(getSDfromSS,logsd2mongo,rb.get,insertRoutes2mongo,fincall);
+}
+
 function launch(){
 
 

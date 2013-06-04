@@ -4,7 +4,7 @@ rb=require('./rb.js');
 var mongoose = require('mongoose');
 Schema = mongoose.Schema;
 //console.log(mysql);
-
+//require('http').createServer().listen('8080');
 //giving unclosed connectnon error
 db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 
@@ -78,8 +78,11 @@ event1.save(function (err) {
   if (err) // ...
   console.log('meow');*/
 
+//Event.collection.insert(gds,{},function(err){
+  for(var i = 10; i >= 0; i-- ){
+  console.log("Row" + gds[i].source)
 
-Event.collection.insert(gds,{},function(err){
+Event.collection.update({source:gds[i].source,destination:gds[i].destination},gds[i],{upsert: true},function(err){
     
       if(err){
         //console.log(event1);
@@ -100,14 +103,16 @@ Event.collection.insert(gds,{},function(err){
           }
           else
           {
+
+
             //for(var i = rows.length - 1; i >= 0; i--) 
-            for(var i = 5; i >= 0; i--) 
+            for(var i = rows.length; i >= 0; i--) 
             {
               console.log(" record"+rows[i]);
-              rb.get(122,124,'22-May-2013',callback)
+              rb.get(rows[i].source,rows[i].destination,'27-May-2013',callback)
             }
             
-            mongoose.connection.close();
+            //mongoose.connection.close();
 
           }
 
@@ -137,6 +142,7 @@ Event.collection.insert(gds,{},function(err){
 
         
     });
+}
 
 
 }
@@ -172,7 +178,7 @@ mongoose.connect('mongodb://'+cfg["MONGO_URL"],function(err){
 
 function callback()
 {
-  mongoose.connection.close();
+  //mongoose.connection.close();
   console.log("Done");
 }
 
