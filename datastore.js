@@ -31,6 +31,8 @@ for(var i = routes.length-1; i >= 0; i-- )
     routes[i].rbSource = srcid;
     routes[i].rbDestination = destid;
     routes[i].doj = doj;
+    //routes[i].operatorid=routes[i].whatever;
+    //routes[i].routeid = routes[i].whatever;
 
 }
 
