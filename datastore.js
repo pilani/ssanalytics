@@ -31,7 +31,7 @@ for(var i = routes.length-1; i >= 0; i-- )
     routes[i].rbSource = srcid;
     routes[i].rbDestination = destid;
     routes[i].doj = doj;
-  }
+
 
 
     //var routesJSON = JSON.stringify(routes[i]);
@@ -44,7 +44,7 @@ for(var i = routes.length-1; i >= 0; i-- )
     ,OpId:routes[i].OpId,RtId:routes[i].RtId},routes[i], {upsert: true} ,function(err){*/
 
    RbRoute.collection.update({rbSource:srcid.rbSource,rbDestination:destid,doj:doj
-    ,OpId:routes[i].OpId,RtId:routes[i].RtId},routes[i], {upsert: true} ,function(err){
+   },routes[i], {upsert: true} ,function(err){
     
    if(err){
     loggit(" error in flushing to mongo "+err);
@@ -57,6 +57,7 @@ for(var i = routes.length-1; i >= 0; i-- )
     sort: { lastUpdated: 1 },
     update: { $lastUpdated: { currDate: 1 } }*/
 } 
+
     /*RbRoute.findOneAndUpdate({source:routes[i].source,destination:routes[i].destination,doj:routes[i].doj
     ,OpId:routes[i].OpId},{source:routes[i].source},function(err,num,rows)
     {
@@ -73,8 +74,10 @@ for(var i = routes.length-1; i >= 0; i-- )
        //loggit("Rows",raw);
     //loggit(" successfully flished to mongo:"+routes.length)
      
-   callback();
+  // callback();
  });
+
+ }
   
   
 

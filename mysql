@@ -95,8 +95,8 @@ event1.save(function (err) {
 	{
 	//console.log("Row %j", gds[i])
 	console.log(" gds"+gds[i].rbSource + gds[i].rbDestination );
-	
-	rb.get(gds[i].rbSource,gds[i].rbDestination,'03-June-2013',callback)
+	//var date = new Date();
+	rb.get(gds[i].rbSource,gds[i].rbDestination,'05-June-2013',callback)
 
 	Event.collection.update({rbSource:gds[i].rbSource,rbDestination:gds[i].rbDestination},gds[i],{upsert: true},function(err){
     
