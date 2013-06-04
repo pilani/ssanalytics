@@ -32,7 +32,7 @@ for(var i = routes.length-1; i >= 0; i-- )
     routes[i].rbDestination = destid;
     routes[i].doj = doj;
 
-
+}
 
     //var routesJSON = JSON.stringify(routes[i]);
     //routes[i].put(source,srcid);
@@ -43,8 +43,8 @@ for(var i = routes.length-1; i >= 0; i-- )
     /*RbRoute.collection.update({rbSource:srcid.rbSource,rbDestination:destid,doj:doj
     ,OpId:routes[i].OpId,RtId:routes[i].RtId},routes[i], {upsert: true} ,function(err){*/
 
-   RbRoute.collection.update({rbSource:srcid.rbSource,rbDestination:destid,doj:doj
-   },routes[i], {upsert: true} ,function(err){
+   RbRoute.collection.update({rbSource:srcid,rbDestination:destid,doj:doj,OpId:OpId,RtId:RtId
+   },routes, {upsert: true} ,function(err){
     
    if(err){
     loggit(" error in flushing to mongo "+err);
@@ -77,9 +77,8 @@ for(var i = routes.length-1; i >= 0; i-- )
   // callback();
  });
 
- }
-  
-  
+   
+
 
 
 /*key
