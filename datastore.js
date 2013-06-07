@@ -40,6 +40,8 @@ function preprocess(routes,srcid,destid,doj,callback)
     routes[i].rbSource = srcid;
     routes[i].rbDestination = destid;
     routes[i].doj = doj;
+    //routes[i].operatorid=routes[i].whatever;
+    //routes[i].routeid = routes[i].whatever;
 
     //this check is added in order to get distinct operator ids and routes id pairs
     var key = routes[i].OpId + '-' + routes[i].RtId;
