@@ -27,17 +27,18 @@ connection.connect(function(err)
 
 exports.queryMysqlDb = queryMysqlDb;
 // currently writing fixed query, change once aync.waterfall works
-function queryMysqlDb(callback)
+function queryMysqlDb(queryString,callback)
 {
 	console.log("Entering queryMysqlDb");
-connection.query('SELECT SUM(a.bookedSeats) AS bs,a.source,b.rbMasterId as rbSource,c.destination,d.rbMasterId as rbDestination, LOCALTIME() as lastupdated FROM gds_routesdata a JOIN  sslocation_region b JOIN gds_routesdata c JOIN  sslocation_region d ON (a.source = b.id AND c.destination = d.id AND a.id = c.id) GROUP BY a.source,c.destination ORDER BY bs DESC LIMIT 10', function(err, rows){
+	console.log("Query",queryString);
+connection.query(queryString, function(err, rows){
 		if(err)
 		{
-		console.log('Error getting records');
+		console.log('Error getting records',err);
 		}
 		else
 		{
-			
+			console.log("records");
 			//writeToSSADb(rows)
 			connection.destroy();
 			console.log(rows);
