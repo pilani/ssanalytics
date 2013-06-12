@@ -7,10 +7,16 @@ var mysql = require('./mysql');
 //mongoDb.createNewCappedModel('test2caps',10240,10000);
 
 //function orchestrate(){
+
+function queryString(callback)
+{	
 var queryString = 'SELECT SUM(a.bookedSeats) AS bs,a.source,b.rbMasterId as rbSource,c.destination,d.rbMasterId as rbDestination, LOCALTIME() as lastupdated FROM gds_routesdata a JOIN  sslocation_region b JOIN gds_routesdata c JOIN  sslocation_region d ON (a.source = b.id AND c.destination = d.id AND a.id = c.id) GROUP BY a.source,c.destination ORDER BY bs DESC LIMIT 10';
+callback(null,queryString);
+
+}
 	async.waterfall(
 
-		[mysqlDb.queryMysqlDb(queryString),mysql.writeToSSADb],function(res,err)
+		[ queryString,mysqlDb.queryMysqlDb,mysql.writeToSSADb],function(res,err)
 		{
 			if(err)
 			{

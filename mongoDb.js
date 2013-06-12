@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
 logger = require('./logger.js'),
 Schema = mongoose.Schema,
 cfg = require('./config.js').config;
+var ObjectId = mongoose.Types.ObjectId;
 
 
 //Exports
@@ -10,6 +11,9 @@ exports.insertRecords = insertRecords;
 exports.upsertRecords = upsertRecords;
 exports.renameCollection = renameCollection;
 exports.createNewCappedModel = createNewCappedModel;
+exports.queryCollection = queryCollection;
+exports.copyRecord = copyRecord;
+exports.insertColumns = insertColumns;
 
 // Mongo Db connection
 Schema = mongoose.Schema;
@@ -72,7 +76,7 @@ function insertRecords(modelName,rowsSetToBeInserted)
 {
 	console.log(rowsSetToBeInserted);
 	var model = mongoose.model(modelName, schema);
-	model.collection.insert(rowsSetToBeInserted,{},function(err)
+	var record = model.collection.insert(rowsSetToBeInserted,{},function(err)
 	{
       if(err)
       {
@@ -83,64 +87,53 @@ function insertRecords(modelName,rowsSetToBeInserted)
       	logger.logMsg("","Successfully inserted records into model " + modelName + "records" + rowsSetToBeInserted );
       }
     });  
-
+	return record;
 }
 
 
-function upsertRecords(modelName,updateConditionFieldsArray,rowsSetToBeUpdated,upsertFlag,newColumnsToBeInserted,newColumnsToBeInsertedFlag)
+// make it more generic 
+function insertColumns(modelName,updateCondition,newColumnsToBeInsertedArray,fromRowSet,toRowSet)
+{
+	logger.logMsg("updateCondition",updateCondition);
+	logger.logMsg("newColumnsToBeInsertedArray",newColumnsToBeInsertedArray);
+	var model = mongoose.model(modelName, schema);
+	
+		logger.logMsg("updateCondition",updateCondition);
+		model.collection.update(updateCondition,newColumnsToBeInsertedArray,{upsert: true},function(err,res)
+			{
+			if(err)
+   				{
+    				logger.logMsg(err,"Error upserting the collection :" + modelName);
+				}
+    		else
+    		{
+
+    			//logger.logMsg("res",res);
+    			//logger.logMsg("","Successfully upserted new records" + fromRowSet[i].campaignId + "into model" + modelName + "existing records" + toRowSet );
+   			}	
+
+		});
+	
+}
+
+
+function upsertRecords(modelName,updateCondition,rowsSetToBeUpdated,upsertFlag)
 {
 	var model = mongoose.model(modelName, schema);
-	for( var i = 0 ; i < rowsSetToBeUpdated.length ; i++)
-	{
-		Step
-		(
-			function()
-			{
-				if(newColumnsToBeInsertedFlag == true)
-				{
-					rowsSetToBeUpdated[i] = insertColumsInTheRequestArray(rowsSetToBeUpdated[i],newColumnsToBeInserted,function(err)
-						{
-							if(err)
-							{
-								logger.logMsg(err,"Failed to add new columns" + newColumnsToBeInserted);
-							}
-							else
-							{
-								logger.logMsg("","Successfully added new columns" + newColumnsToBeInserted + "into model" + modelName);
-							}
-						});
+	console.log("updateCondition", updateCondition + "rowsSetToBeUpdated" + rowsSetToBeUpdated);
+	model.collection.update(updateCondition,rowsSetToBeUpdated,{upsert: upsertFlag},function(err)
+		{
+			if(err)
+   				{
+    				logger.logMsg(err,"Error upserting the collection :" + modelName);
 				}
-			},
+    		else
+    		{
+    			//logger.logMsg("","Successfully upserted new records" + rowsSetToBeUpdated + "into model" + modelName);
+   			}	
 
-			function()
-			{
-				// forming the update condition string
-				var updateConditionFieldsArrayString = {};
-				for(var j = 0; j < updateConditionFieldsArray.length ; j++)
-				{
-					// TODO Write updation logic
-					//updateConditionFieldsArrayString 
-				}
-			},	
-			
-			function(updateConditionFieldsArrayString)
-			{
-
-				model.collection.update(updateConditionFieldsArrayString,rowsSetToBeUpdated[i],{upsert: upsertFlag},function(err)
-				{
-					if(err)
-   					{
-    					logger.logMsg(err,"Error upserting the collection :" + newColumnsToBeInserted + "into model" + modelName);
-					}
-    				else
-    				{
-    					logger.logMsg("","Successfully upserted new records" + newColumnsToBeInserted + "into model" + modelName);
-   					}
-
-				});
-			}	
-		)	
-	}
+		});
+				
 }
 
 function renameCollection(oldName, newName)
@@ -159,7 +152,71 @@ function renameCollection(oldName, newName)
 
 }
 
+function queryCollection(modelName,queryString,callback)
+{
+	var model = mongoose.model(modelName, schema);
+	logger.logMsg("queryString",queryString);
+	//model.where(queryString).exec(function(err,res)
+	model.find(queryString,function(err,res)
+		{
+			if(err)
+			{
+				logger.logMsg(err,"Error in querying");
+			}
+			else
+			{
+				logger.logMsg("Results",res);
+				callback(null,res);
+			}
+		});
+}
 
+function copyRecord(modelName,recordToBeCopied)
+{
+	var model = mongoose.model(modelName, schema);
+	logger.logMsg("Record to be copied",recordToBeCopied);
+	//recordToBeCopied = recordToBeCopied.clone();
+	//logger.logMsg("New obj id",new ObjectId());
+	//recordToBeCopied._id = undefined;
+	//logger.logMsg("Record to be copied",recordToBeCopied);
+	recordToBeCopied._id = new ObjectId();
+
+	//insertRecords(modelName,recordToBeCopied);
+
+	model.collection.save(recordToBeCopied,function(err,res)
+		{
+			if(err)
+			{
+				logger.logMsg(err,"Error in copying record");
+			}
+			else
+			{
+				logger.logMsg("Results",res);
+				callback(null,res);
+			}
+		});
+	
+	//var queryString = {id:recordToBeCopied._id};
+
+	//upsertRecords(modelName,queryString,recordToBeCopied,false);
+	//insertRecords(modelName,recordToBeCopied);
+	/*model.collection.save(recordToBeCopied,function(err,res)
+		{
+			if(err)
+			{
+				logger.logMsg(err,"Error in copying record");
+			}
+			else
+			{
+				logger.logMsg("Results",res);
+				callback(null,res);
+			}
+		});*/
+	//logger.logMsg("Record duplicated",recordToBeCopied._id);
+}
+
+
+//not used
 function insertColumsInTheRequestArray(rowToBeInserted,newColumnsToBeInserted)
 {
 
