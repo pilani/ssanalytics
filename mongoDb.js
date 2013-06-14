@@ -14,6 +14,7 @@ exports.createNewCappedModel = createNewCappedModel;
 exports.queryCollection = queryCollection;
 exports.copyRecord = copyRecord;
 exports.insertColumns = insertColumns;
+exports.formInQuery = formInQuery;
 
 // Mongo Db connection
 Schema = mongoose.Schema;
@@ -23,26 +24,27 @@ db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 var schema = mongoose.Schema({ key: String});
 
 
-function createNewModel(modelName)
+function createNewModel(modelName,callback)
 {
 	var newModel = mongoose.model(modelName, schema);
 
 	// insert dummy row
 	var newRecord = new newModel({key: "value"});
 
-	newRecord.save(function(err){
+	newRecord.save(function(err,res){
  		
  	 if(err)
  		{
  		 	logger.logMsg(err,"MongoDb row insertion error");
- 		 	return err;
+ 		 	callback(err,res);
  		 }
  		 else
  		 {
  		 	logger.logMsg("","Schema" + modelName + "created successfully" );
+ 		 	callback(null,res);
  		 }
 });
-	return newModel;
+	//return newModel;
 
 }
 
@@ -72,11 +74,11 @@ function createNewCappedModel(modelName,size,maxNumRows)
 }
 
 
-function insertRecords(modelName,rowsSetToBeInserted)
+function insertRecords(modelName,rowsSetToBeInserted,callback)
 {
-	console.log(rowsSetToBeInserted);
+	//console.log(rowsSetToBeInserted);
 	var model = mongoose.model(modelName, schema);
-	var record = model.collection.insert(rowsSetToBeInserted,{},function(err)
+	var record = model.collection.insert(rowsSetToBeInserted,{},function(err,res)
 	{
       if(err)
       {
@@ -84,10 +86,11 @@ function insertRecords(modelName,rowsSetToBeInserted)
       }
       else
       {
-      	logger.logMsg("","Successfully inserted records into model " + modelName + "records" + rowsSetToBeInserted );
+      	//logger.logMsg("Successfully inserted records into model " + modelName + "records" + rowsSetToBeInserted );
+      	callback(null,res);
       }
     });  
-	return record;
+	//return record;
 }
 
 
@@ -165,7 +168,7 @@ function queryCollection(modelName,queryString,callback)
 			}
 			else
 			{
-				logger.logMsg("Results",res);
+				//logger.logMsg("Results",res);
 				callback(null,res);
 			}
 		});
@@ -225,6 +228,33 @@ function insertColumsInTheRequestArray(rowToBeInserted,newColumnsToBeInserted)
 		rowToBeInserted.newColumnsToBeInserted[i] = newColumnsToBeInserted[i];
 	}
 	return rowToBeInserted;
+}
+
+
+// not working , query runs on mongo but mongoose gives all the records no filtering
+function formInQuery(paramArray,field,stringFlag)
+{
+var	queryString = '{ ' + field + ': {'  + ' \'' + '$in' + '\'' + ': [ ';
+var fieldValues = "";
+	for(i = 0 ; i< paramArray.length ; i ++)
+	{
+		// if LOVs to be cmped are strings - put '' 
+		if(stringFlag == true)
+		{
+			fieldValues = fieldValues + '\'' + paramArray[i] + '\'';
+		}
+		else
+		{
+			fieldValues = fieldValues +  paramArray[i] ;
+		}
+		if(i != paramArray.length-1)
+		{
+		fieldValues = fieldValues + ', ';
+	}
+	}
+	queryString = queryString + fieldValues + ' ] } }'
+	return queryString;
+	//logger.logMsg("queryString",queryString);
 }
 
 

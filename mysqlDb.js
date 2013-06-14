@@ -2,6 +2,7 @@
 var mysql = require('mysql');
 exports.queryMysqlDb = queryMysqlDb;
 exports.queryMysqlDbWithKey = queryMysqlDbWithKey;
+exports.runPreparedStatement =runPreparedStatement;
 
 
 
@@ -34,7 +35,7 @@ function queryMysqlDb(queryString,callback)
 {
 	console.log("Entering queryMysqlDb");
 	console.log("Query",queryString);
-connection.query(queryString, function(err, rows){
+connection.query(queryString, function(err, res){
 		if(err)
 		{
 		console.log('Error getting records',err);
@@ -44,8 +45,8 @@ connection.query(queryString, function(err, rows){
 			//console.log("records");
 			//writeToSSADb(rows)
 			//connection.destroy();
-			//console.log(rows);
-		    callback(null,rows);
+			//console.log(res);
+		    callback(null,res);
 			//connection.destroy();
 			//console.log('connection ended');
 			
@@ -90,5 +91,12 @@ function queryMysqlDbWithKey(queryString,innerQueryFlag,key,callback)
 
 		}
 });
+}
+
+
+// TODO
+function runPreparedStatement(preparedStatement)
+{
+	//connection.execute(preparedStatement);
 }
 

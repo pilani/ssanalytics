@@ -2,6 +2,9 @@ var opr = require('./operatorroutes.js');
 var mysql = require('./mysqlDb.js');
 var hashes = require('hashes');
 
+var prepStat = "PREPARE stmt1 FROM 'SELECT a.*,b.fromdate,b.todate,c.source,c.destination FROM gds_campaign a JOIN gds_campaigndate b ON a.id = b.campaignid OIN gds_campaignroute c ON a.id = c.campaignid'";
+mysql.runPreparedStatement(prepStat);
+
 var queryString = 'SELECT SUM(a.bookedSeats) AS bs,a.source,b.rbMasterId as rbSource,c.destination,d.rbMasterId as rbDestination, LOCALTIME() as lastupdated FROM gds_routesdata a JOIN  sslocation_region b JOIN gds_routesdata c JOIN  sslocation_region d ON (a.source = b.id AND c.destination = d.id AND a.id = c.id) GROUP BY a.source,c.destination ORDER BY bs DESC LIMIT 10';
 
 mysql.queryMysqlDb(queryString);
