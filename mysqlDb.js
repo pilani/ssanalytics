@@ -2,9 +2,6 @@
 var mysql = require('mysql');
 exports.queryMysqlDb = queryMysqlDb;
 exports.queryMysqlDbWithKey = queryMysqlDbWithKey;
-exports.runPreparedStatement =runPreparedStatement;
-
-
 
 var connection = mysql.createConnection({
   host     : 'ss-db-staging.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
@@ -12,6 +9,13 @@ var connection = mysql.createConnection({
   password : 'BackupInstance456',
   database: 'sstru1',
 });
+
+/*var connection = mysql.createConnection({
+  host     : 'ss-prod.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
+  user     : 'readonlyuser',
+  password : 'slowWork',
+  database: 'ssprod',
+});*/
 
 
 connection.connect(function(err)
@@ -94,9 +98,4 @@ function queryMysqlDbWithKey(queryString,innerQueryFlag,key,callback)
 }
 
 
-// TODO
-function runPreparedStatement(preparedStatement)
-{
-	//connection.execute(preparedStatement);
-}
 

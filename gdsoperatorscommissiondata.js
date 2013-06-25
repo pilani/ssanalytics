@@ -1,133 +1,75 @@
-var mysql = require('./mysqlDb.js');
+//var mysql = require('./mysqlDb.js');
 var mongo = require('./mongoDb.js');
 var logger = require('./logger.js');
 var async = require('async');
-var gdscampaign = require('./gdscommissionrequest.js');
-dumpGdsData();
+var pg = require('pg'); 
 
-/*var modelName = "" ;
-//var newQueryString='';
+//var time = require('time')(Date);
+//var gdsreq = require('./gdscommissionrequest.js');
+//dumpGdsData();
+
+var modelName = "" ;
+var newQueryString='';
 var findQuery = "";
+var queryString = "";
+var srcQuery,destQuery;
 
-function setQueryString(res,callback)
-{	
-	console.log("Res",res);
-	var queryString = 'SELECT a.*,b.fromdate,b.todate,c.source,c.destination FROM gds_campaign a JOIN gds_campaigndate b ON a.id = b.campaignid JOIN gds_campaignroute c ON a.id = c.campaignid';
-	callback(null,queryString);
-}
+var src=3;
+var dest= 6;
+var doj = '2013-06-15';
+// default fromdate is 2012-01-01
+var fromdate = '2012-06-01';
+// default todate is 2013-12-31
+var todate = Date.now(); 
 
 
-function setModelName(callback)
-{
-	modelName = 'gdsoperatorcommissions';
-	callback(null,modelName);
-}
 
-function queryMongo(callback)
-{
-	findQuery();
 
-}
 
 async.waterfall(
 
-	[ setModelName,mongo.createNewModel,setQueryString,queryingMysql,mongo.insertRecords],function(err,res)
+	[setModelName,consolidatedOperatorCommissionQuery],function(err,res)
 	{
 		if(err)
 		{
-			console.log("err" +  err);
+			logger.logMsg("err" +  err);
 		}
 		else
 		{
-			console.log("Res length",res.length);
+			logger.logMsg("Max Commission",res[0].bonusCommission);
+			logger.logMsg("Res length",res.length);
 			//console.log("Res :%j", res[0]);
 		}
 		
 	});
 
 
-function queryingMysql(queryString,callback)
-{
-	mysql.queryMysqlDb(queryString,function(err,res)
-	{
-		if(err)
-		{
-			logger.log(err,"Error occured while querying mysql with queryString " + queryString);
-		}
-		else
-		{
-			logger.logMsg("Results " + res);
-			callback(null,modelName,res);
-		}
-	});
-}*/
-
-
-function dumpGdsData()
-{
-	logger.logMsg("Entered dumpGdsData");
-	var queryString = 'SELECT a.*,b.fromdate,b.todate,c.source,c.destination FROM gds_campaign a JOIN gds_campaigndate b ON a.id = b.campaignid JOIN gds_campaignroute c ON a.id = c.campaignid';
-	mysql.queryMysqlDb(queryString,function(err,res)
-	{
-		if(err)
-		{
-			logger.logMsg(err,"Error getting gds campaign data");
-		}
-		else
-		{
-			//mongo.createNewModel('gdsoperatorcommissions');
-			mongo.insertRecords('gdsoperatorcommissions',res,function(err,res)
-				{
-					if(err)
-					{
-						logger.logMsg(err,"Error inserting gds campaign data");
-					}
-					else
-					{
-						//logger.logMsg("Inserting gds campaign data",res);
-						formQuery(3,null,null,null,null,56884488);
-				}
-				});
-			
-		}
-	});
-}
-
-
-
-
-
-
-function formQuery(src,destination,doj,fromDate,toDate,operatorId)
+function consolidatedOperatorCommissionQuery(modelname,callback)
 {
 	
-	var queryString = "";
-	var srcQuery = "";
-	var paramArray = new Array();
-	if(src != null)
-	{
-		//srcQuery = {source: {$in : [-1,src]}}
-		paramArray.push(-1);
-		paramArray.push(src);
-		//queryString = queryString + 'source:-1' + '\t' + 'OR' + '\t' + 'source:' + src;
-	}
-	srcQuery = mongo.formInQuery(paramArray,'source',false);
-	//queryString = queryString + '{' + srcQuery + '}';
-	logger.logMsg("srcQuery",srcQuery);
-	var str ={source: {$in : [paramArray[0],paramArray[1],]}};
-	logger.logMsg("str",str);
-	mongo.queryCollection('gdsoperatorcommissions',srcQuery,function(err,res)
+	var consQuery = { '$and': [src == null? {source : -1} : { source: { '$in': [ -1, src ] } }, dest == null?  {destination : -1} : { destination : { '$in': [ -1, dest] } },  todate == null?  {todate:{ '$lt': new Date('2013-12-31')}} : {todate:{ '$lt' : new Date(todate)} }, fromdate == null?  {fromdate:{ '$gte': new Date('2012-01-01')}} : {fromdate:{ '$gte' : new Date(fromdate)} }  ] };
+	var optionParam =  {sort: { 'bonusCommission': -1} ,limit: 1 };
+	mongo.queryAndSortCollection(modelName,consQuery,optionParam,function(err,res)
 		{
 			if(err)
 			{
-				logger.logMsg(err, "Error occured while querying");
+
 			}
 			else
 			{
-				//logger.logMsg("Query Results sources",res);
+				//logger.logMsg("Results",res.length);
+				callback(null,res);
+				//mongo.connection.close();
 			}
 		});
 
 
+}
+
+function setModelName(callback)
+{
+	modelName = 'gdsprodrecords';
+	logger.logMsg('modelName',modelName);
+	callback(null,modelName);
 }
 

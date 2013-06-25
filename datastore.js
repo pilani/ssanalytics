@@ -1,97 +1,90 @@
-var mongoose = require('mongoose'),Schema = mongoose.Schema,
-cfg = require('./config.js').config;
-var hashes = require('hashes');
-var distinctOpRoutes = new hashes.HashSet();
-
-var rbRouteSchema = new Schema({
-
- mserverTime:{ type: Date, default: Date.now }
-});// table rotation not needed as we have in-built ttl based expiry 
-rbRouteSchema.index({ "mserverTime": 1 }, { expireAfterSeconds: cfg["RBROUTE_EXP_TIME"] });
-
-mongoose.model('rbRoute', rbRouteSchema);
-/*mongoose.connect('mongodb://'+cfg["MONGO_URL"],function(err){
-    if(err){
-        loggit("error in connecting to mongo"+err.stack)
-    }else { loggit (" connection to mongo succesfull")};
-});*/
-var RbRoute = mongoose.model('rbRoute');
-/*var singleRow = new RbRoute({
-     });
-singleRow.setValue("key","value");// kind of a hack so that schema is flushed to mongo before actual insertion of data begins
-singleRow.save(function(err){
-  if(err)
-  loggit(err)
-});*/
+var mongo = require('./mongoDb.js');
+var logger = require('./logger.js');
+logger = require('./logger.js');
+//var hashes = require('hashes');
+//var distinctOpRoutes = new hashes.HashSet();
 
 
-// global variables
-
-var opRoutesArray= new Array();
-var count = 0;
-
-
-function preprocess(routes,srcid,destid,doj,callback)
+/*function preprocess(routes,srcid,destid,doj,callback)
 {
  for(var i  = 0; i < routes.length; i++ )
   {
 
     //Adding these fields into the record
-    routes[i].rbSource = srcid;
-    routes[i].rbDestination = destid;
+    routes[i].destination = destid;
+    routes[i].source = srcid;
     routes[i].doj = doj;
     //routes[i].operatorid=routes[i].whatever;
     //routes[i].routeid = routes[i].whatever;
 
     //this check is added in order to get distinct operator ids and routes id pairs
     var key = routes[i].OpId + '-' + routes[i].RtId;
-    loggit("Key",key);
+    //logger.logMsg("Key",key);
     distinctOpRoutes.add(key);
 
-  }
-  loggit("distinctOpRoutes",distinctOpRoutes);
-}
+    //logger.logMsg("i value",i);
+    if(i == routes.length-1)
+    {
+      callback(null,routes,srcid,destid,doj);
+    }
 
+  }
+  //logger.logMsg("distinctOpRoutes",distinctOpRoutes);
+  
+}
+*/
 
 function insertRoutes(routes,srcid,destid,doj,callback)
 {
-  var keys = distinctOpRoutes.getKeys();
-  for(i=0;i < keys.length ; i++)
+  //var keys = distinctOpRoutes.getKeys();
+  //logger.logMsg("Keys length",keys.length);
+  logger.logMsg("routes length",routes.length);
+
+  for(i=0;i < routes.length ; i++)
   {
-  var newkeys = keys.split('-');
-   RbRoute.collection.update({rbSource:srcid,rbDestination:destid,doj:doj,OpId:newkeys[0],RtId:newkeys[1]
-   },routes, {upsert: true} ,function(err){
+
+// inserting the columns into the routes data
+  routes[i].destination = destid;
+  routes[i].source = srcid;
+  routes[i].doj = doj;  
+
+
+  var updateCondition = {source:srcid,destination:destid,doj:doj,OpId:routes[i].OpId,RtId:routes[i].RtId};
+  mongo.upsertRecords("rbroutes",updateCondition,routes[i],true,function(err){
     
    if(err){
-    loggit(" error in flushing to mongo "+err);
+    logger.logMsg(" error in flushing to mongo "+err);
    }else{ 
-     loggit("logged into mongodb");
-}
+     logger.logMsg(" flushed to mongo ");
+     if(i == routes.length-1)
+    {
+      callback(null);
+    }
+
+    
+  }
  });
- }
+ 
+}
 }
 
-function logRbRoutes(routes,srcid,destid,doj,callback){
+function logRbRoutes(routes,srcid,destid,doj,callback)
+{
 
-loggit("routes[0]",routes[0]);
-preprocess(routes,srcid,destid,doj,callback,function(err,callback){
-  if(err)
-  {
-    loggit("Error in getting distinct operator routes pairs");
-  }
-  else
-  {
-    insertRoutes(routes,srcid,destid,doj,callback);
-  }
+  insertRoutes(routes,srcid,destid,doj,function(err)
+  {     if(err)
+     {
+      logger.logMsg(" error in flushing to mongo "+err);
+     }
 
-})
+     else
+     { 
+        callback(null);
+     }
+        
+ });
 
-
+ } 
   
-  
-}
+
 exports.logRbRoutes=logRbRoutes;
-
-function loggit(msg){
-  console.log(msg);
-}

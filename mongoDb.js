@@ -16,8 +16,11 @@ exports.copyRecord = copyRecord;
 exports.insertColumns = insertColumns;
 exports.formInQuery = formInQuery;
 
+//Testing
+exports.queryAndSortCollection = queryAndSortCollection;
+
+
 // Mongo Db connection
-Schema = mongoose.Schema;
 db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 
 //default schema
@@ -76,7 +79,7 @@ function createNewCappedModel(modelName,size,maxNumRows)
 
 function insertRecords(modelName,rowsSetToBeInserted,callback)
 {
-	//console.log(rowsSetToBeInserted);
+	console.log("modelName",modelName);
 	var model = mongoose.model(modelName, schema);
 	var record = model.collection.insert(rowsSetToBeInserted,{},function(err,res)
 	{
@@ -120,10 +123,12 @@ function insertColumns(modelName,updateCondition,newColumnsToBeInsertedArray,fro
 }
 
 
-function upsertRecords(modelName,updateCondition,rowsSetToBeUpdated,upsertFlag)
+
+
+function upsertRecords(modelName,updateCondition,rowsSetToBeUpdated,upsertFlag,callback)
 {
 	var model = mongoose.model(modelName, schema);
-	console.log("updateCondition", updateCondition + "rowsSetToBeUpdated" + rowsSetToBeUpdated);
+	//console.log("updateCondition", updateCondition + "rowsSetToBeUpdated" + rowsSetToBeUpdated);
 	model.collection.update(updateCondition,rowsSetToBeUpdated,{upsert: upsertFlag},function(err)
 		{
 			if(err)
@@ -132,6 +137,7 @@ function upsertRecords(modelName,updateCondition,rowsSetToBeUpdated,upsertFlag)
 				}
     		else
     		{
+    			callback(null);
     			//logger.logMsg("","Successfully upserted new records" + rowsSetToBeUpdated + "into model" + modelName);
    			}	
 
@@ -173,6 +179,27 @@ function queryCollection(modelName,queryString,callback)
 			}
 		});
 }
+
+function queryAndSortCollection(modelName,queryString,optionsString,callback)
+{
+	var model = mongoose.model(modelName, schema);
+	logger.logMsg("queryString",queryString);
+	//model.where(queryString).exec(function(err,res)
+	model.find(queryString,null,optionsString ,function(err,res)
+		{
+			if(err)
+			{
+				logger.logMsg(err,"error occured");
+			}
+			else
+			{
+				//logger.logMsg("Record",res);
+				callback(null,res);
+			}
+		});
+
+}
+
 
 function copyRecord(modelName,recordToBeCopied)
 {
