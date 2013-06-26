@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 cfg = require('./config.js').config;
 db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 var hashes = require('hashes');
+var operId = 6;
 
 
 //default schema
@@ -20,29 +21,55 @@ var fareArray = new Array();
 
 var map = function() {
    // logger.logMsg("mapper");
+  /* for (var idx = 0; idx < this.FrLst.length; idx++) {
+            var key = this.OpId;
+            var value = {
+                         count: 1,
+                         fare: this.FrLst[idx].qty
+                                       };
+                           emit(key, value);
+                       }*/
+ //var fareSum = 0;
+ //var par = JSON.parse(this.FrLst);
+  /*for(i=0;i<par.length;i++)
+  {
+    fareSum += parseInt(par[i]);
+    if(i == par.length-1)
+    {
+        var value = {fareSum:fareSum};
+    emit(this.OpId, fareSum);
+}*/
 
-  emit(this.OpId, this.FrLst);
-}
+var input = {
+     fare_sum:Array.sum(this.FrLst),
+     count:this.FrLst.length,
+     avg_fare: 0,
+     op_avg_fare:0
+    };
+emit(this.OpId, input);
+  }
+
+ // var value = Array.sum(this.FrLst);
+  
+
 
 var reduce = function(key, values) {
 
-  var r = { OperatorId: key, ap_sum: 0, count: 0, avg_mark: 0 };
-  for(var i in values) {
-    var fare = 0;
 
-    r.ap_sum = Array.sum(values[i]);
-    /*if(values[i] != null)
-    {
-    for(var j in values[i])
-    {
-     fare= parseInt(values[i][j]);
-    r.ap_sum += fare;
+  var r = { fare_sum:0,count: 0, avg_fare: 0 };
+  for(var i in values) {
+   // var fare = 0;
+    r.fare_sum += values[i].fare_sum;
+      r.count += values[i].count;
+
+/*for(j=0;j<values[i].FrLst.length;j++)
+{
+
+    //r.fare_sum += values[i].frLst[j];
+    r.fare_sum +=parseInt(values[i].frLst[j]);
     r.count += 1;
 }
-}
-else
- r.count += 1;
-  }
+  
  /* values.forEach(function(v) {
    // v.forEach(function(i)
     //{ 
@@ -53,7 +80,6 @@ else
     
     //console.log("reducer");*/
 
-r.count += 1;
   }
   return r;
 }
@@ -61,7 +87,7 @@ r.count += 1;
 var finalize = function(key, value) {
   if (value.count > 0) {
    // console.log("reducer");
-    value.avg_mark = value.ap_sum / value.count;
+    value.avg_fare = value.fare_sum / value.count;
   }
   return value;
 }
@@ -70,13 +96,13 @@ var finalize = function(key, value) {
 model.mapReduce({
   map: map,
   reduce: reduce,
- 
+  //query:{OpId:6},
   out: { reduce: "session_stat" },
-  finalize: finalize
-}, function(err, ret){ 
+  finalize: finalize,verbose: true  
+}, function(err, ret,stats){ 
   if (err) console.log(err)
   else {
-    console.log(ret.length)
+    console.log(stats);
 
 }
     })
