@@ -18,6 +18,37 @@ var fareArray = new Array();
 //getFareData(3309);
 
 
+/*
+
+var map = function(){
+
+val = new Object();
+
+if(this.IsAc){
+
+val['ACFARE']=set fare from list;
+}
+if(this.IsSeater){
+
+val['SEATER_FARE']=set fare from list;
+}
+
+
+val['OCCUPANCY]= (this.availableSeats/this.totalSeatsAvailable)*100;
+
+emit(this.OpId,val);
+
+}
+
+
+var reduce = function (){
+
+var r = (operatorId:key,avgAcFare:0,avgSeaterFare:0,occupancy:0)
+for()
+
+}
+
+*/
 var map = function() {
    // logger.logMsg("mapper");
 
