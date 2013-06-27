@@ -30,7 +30,7 @@ map = function() {
   other_oper_str_count=0;
 
 
-if(this.OpId == this.OpId)
+if(this.OpId == operId)
 {
   // AC Fare 
   if(this.IsAc)
@@ -156,7 +156,7 @@ var input = {
   other_oper_str_count:other_oper_str_count 
     };
 
-emit(this.OpId, input);
+emit(operId, input);
   }
 
  // var value = Array.sum(this.FrLst);
