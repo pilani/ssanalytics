@@ -6,7 +6,6 @@ db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 var hashes = require('hashes');
 var operId = 6;
 
-
 //default schema
 var schema = mongoose.Schema({ key: String});
 var model = mongoose.model("rbroutes", schema);
@@ -28,6 +27,10 @@ map = function() {
   oper_str_count=0;
   other_oper_slp_count=0;
   other_oper_str_count=0;
+  oper_AC_count=0;
+  other_oper_AC_count=0;
+  oper_NAC_count=0;
+  other_oper_NAC_count=0;
 
 
 if(this.OpId == operId)
@@ -36,12 +39,14 @@ if(this.OpId == operId)
   if(this.IsAc)
   {
     op_AC_fare_sum = Array.sum(this.FrLst);
+    oper_AC_count = this.FrLst.length;
   }
 
   // Non AC Fare
   if(!this.IsAc)
   {
     op_NAC_fare_sum = Array.sum(this.FrLst);
+    oper_NAC_count = this.FrLst.length;
   }
 
  if(this.IsSlpr && !this.IsStr)
@@ -88,12 +93,14 @@ else
   if(this.IsAc)
   {
     other_op_AC_fare_sum = Array.sum(this.FrLst);
+    other_oper_AC_count = this.FrLst.length;
   }
 
   // Non AC Fare
   if(!this.IsAc)
   {
     other_op_NAC_fare_sum = Array.sum(this.FrLst);
+    other_oper_NAC_count = this.FrLst.length;
   }
 
    if(this.IsSlpr && !this.IsStr)
@@ -140,8 +147,6 @@ var input = {
    other_fare_sum:other_fare_sum,
    other_oper_count:other_oper_count,
    oper_count:oper_count,
-   oper_avg_fare: 0,
-   other_oper_avg_fare:0,
   op_AC_fare_sum : op_AC_fare_sum,
   op_NAC_fare_sum :op_NAC_fare_sum,
   op_Slpr_fare_sum : op_Slpr_fare_sum,
@@ -153,7 +158,21 @@ var input = {
   oper_slp_count:oper_slp_count,
   oper_str_count:oper_str_count,
   other_oper_slp_count:other_oper_slp_count,
-  other_oper_str_count:other_oper_str_count 
+  other_oper_str_count:other_oper_str_count,
+  oper_avg_fare: 0,
+   other_oper_avg_fare:0,
+   oper_AC_avg_fare: 0,
+   other_oper_AC_avg_fare:0,
+   oper_NAC_avg_fare: 0,
+   other_oper_NAC_avg_fare:0,
+   oper_Slpr_avg_fare: 0,
+   other_oper_Slpr_avg_fare:0,
+   oper_Str_avg_fare: 0,
+   other_oper_Str_avg_fare:0,
+   oper_AC_count:oper_AC_count,
+  other_oper_AC_count:other_oper_AC_count,
+  oper_NAC_count:oper_NAC_count,
+  other_oper_NAC_count:other_oper_NAC_count
     };
 
 emit(operId, input);
@@ -177,46 +196,77 @@ var reduce = function(key, values) {
   oper_slp_count:0,
   oper_str_count:0,
   other_oper_slp_count:0,
-  other_oper_str_count:0 };
+  other_oper_str_count:0, 
+  oper_AC_avg_fare: 0,
+  other_oper_AC_avg_fare:0,
+  oper_NAC_avg_fare: 0,
+  other_oper_NAC_avg_fare:0,
+  oper_Slpr_avg_fare: 0,
+  other_oper_Slpr_avg_fare:0,
+  oper_Str_avg_fare: 0,
+  other_oper_Str_avg_fare:0,
+  oper_AC_count:0,
+  other_oper_AC_count:0,
+  oper_NAC_count:0,
+  other_oper_NAC_count:0 };
 
 
   for(var i in values) {
    // var fare = 0;
     r.op_fare_sum += values[i].op_fare_sum;
-    r.other_fare_sum += values[i].other_fare_sum;
     r.oper_count += values[i].oper_count;
-    r.other_oper_count += values[i].other_oper_count;
     r.operId = values[i].operId;
     r.op_AC_fare_sum += values[i].op_AC_fare_sum;
     r.op_NAC_fare_sum +=values[i].op_NAC_fare_sum;
     r.op_Slpr_fare_sum += values[i].op_Slpr_fare_sum;
     r.op_Str_fare_sum  += values[i].op_Str_fare_sum;
+
+
+    r.other_fare_sum += values[i].other_fare_sum;
+    
+    r.other_oper_count += values[i].other_oper_count;
+    
+    
     r.other_op_AC_fare_sum += values[i].other_op_AC_fare_sum;
     r.other_op_NAC_fare_sum +=values[i].other_op_NAC_fare_sum;
     r.other_op_Slpr_fare_sum += values[i].other_op_Slpr_fare_sum;
     r.other_op_Str_fare_sum += values[i].other_op_Str_fare_sum;
-    r.oper_slp_count +=values[i].oper_slp_count;;
-    r.oper_str_count +=values[i].oper_str_count;;
-    r.other_oper_slp_count +=values[i].other_oper_slp_count;;
-    r.other_oper_str_count +=values[i].other_oper_str_count;;
+    r.oper_slp_count +=values[i].oper_slp_count;
+    r.oper_str_count +=values[i].oper_str_count;
+    r.other_oper_slp_count +=values[i].other_oper_slp_count;
+    r.other_oper_str_count +=values[i].other_oper_str_count;
+    r.oper_AC_count += values[i].oper_AC_count;
+    r.other_oper_AC_count += values[i].other_oper_AC_count;
+    r.oper_NAC_count += values[i].oper_NAC_count;
+    r.other_oper_NAC_count += values[i].other_oper_NAC_count
   }
 
   return r;
 }
 
 var finalize = function(key, value) {
+
   if (value.oper_count > 0) {
    // console.log("reducer");
     value.oper_avg_fare = value.op_fare_sum / value.oper_count;
+    value.oper_AC_avg_fare = value.op_AC_fare_sum / value.oper_AC_count;
+    value.oper_NAC_avg_fare = value.op_NAC_fare_sum / value.oper_NAC_count;
+    value.oper_Slpr_avg_fare = value.op_Slpr_fare_sum / value.oper_slp_count;
+    value.oper_Str_avg_fare = value.op_Str_fare_sum / value.oper_str_count;
   }
   if (value.other_oper_count > 0) {
     value.other_oper_avg_fare = value.other_fare_sum / value.other_oper_count;
+    value.other_oper_AC_avg_fare = value.other_op_AC_fare_sum / value.other_oper_AC_count;
+    value.other_oper_NAC_avg_fare = value.other_op_NAC_fare_sum / value.other_oper_NAC_count;
+    value.other_oper_Slpr_avg_fare = value.other_op_Slpr_fare_sum / value.other_oper_slp_count;
+    value.other_oper_Str_avg_fare = value.other_op_Str_fare_sum / value.other_oper_str_count;
+
   }
   return value;
 }
 
 //mongoose.connection.db.executeDbCommand({
-model.mapReduce({
+/*model.mapReduce({
   map: map,
   reduce: reduce,
   //query:{OpId:6},
@@ -229,10 +279,10 @@ model.mapReduce({
     console.log(stats);
 
 }
-    })
+    })*/
   
 
-
+getFareData()
 function aggregateRecords(modelName,matchString,callback)
 {
     //var ms = { IsAc: false };
@@ -240,12 +290,14 @@ function aggregateRecords(modelName,matchString,callback)
     var model = mongoose.model(modelName, schema);
     var fareAvg = 0;
     model.aggregate([
-        { $match:  matchString},
+        //{ $match:  matchString},
          { $unwind : "$FrLst" },
         { $group: {
             _id: {
+                "OpId" : "$OpId",
                 "source" : "$source",
-                "destination": "$destination"
+                "destination": "$destination",
+                "doj" : "$doj"
             },
             fareAvg: { $avg: '$FrLst'}
         }}
@@ -262,10 +314,10 @@ function aggregateRecords(modelName,matchString,callback)
 }
 
 
-function getFareData(OperatorId,callback)
+function getFareData(callback)
 {
-    var matchString = { IsAc: false, OpId : OperatorId };
-    var opFareAvg = aggregateRecords("rbroutes",{ IsAc: false, OpId : OperatorId },function(err,res){
+    //var matchString = { IsAc: false, OpId : OperatorId };
+    var opFareAvg = aggregateRecords("rbroutes",null,function(err,res){
         if(err)
         {
             logger.logMsg(err,"Error retrieving fare");
@@ -277,7 +329,7 @@ function getFareData(OperatorId,callback)
             for (var i=0; i<res.length; i++)
             {
                // var json = JSON.parse(res[i]);
-                  logger.logMsg("res[i]._id.source ",res[i]._id.source);
+                  logger.logMsg("res[i] ",res[i]);
             }
             /*for(i = 0; i < res.length ;i++)
             {
