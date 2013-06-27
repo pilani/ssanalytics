@@ -11,72 +11,151 @@ var operId = 6;
 var schema = mongoose.Schema({ key: String});
 var model = mongoose.model("rbroutes", schema);
 
+map = function() {
+  op_AC_fare_sum = 0;
+  op_NAC_fare_sum =0;
+  op_Slpr_fare_sum = 0;
+  op_Str_fare_sum = 0;
+  other_op_AC_fare_sum = 0;
+  other_op_NAC_fare_sum =0;
+  other_op_Slpr_fare_sum = 0;
+  other_op_Str_fare_sum = 0;
+  other_fare_sum =0;
+  other_oper_count =0;
+  op_fare_sum  =0;
+  oper_count =0 ;
+  oper_slp_count=0;
+  oper_str_count=0;
+  other_oper_slp_count=0;
+  other_oper_str_count=0;
 
 
-
-var faresHashTable = new hashes.HashTable();
-var fareArray = new Array();
-//getFareData(3309);
-
-
-/*
-
-var map = function(){
-
-val = new Object();
-
-if(this.IsAc){
-
-val['ACFARE']=set fare from list;
-}
-if(this.IsSeater){
-
-val['SEATER_FARE']=set fare from list;
-}
-
-
-val['OCCUPANCY]= (this.availableSeats/this.totalSeatsAvailable)*100;
-
-emit(this.OpId,val);
-
-}
-
-
-var reduce = function (){
-
-var r = (operatorId:key,avgAcFare:0,avgSeaterFare:0,occupancy:0)
-for()
-
-}
-
-*/
-var map = function() {
-   // logger.logMsg("mapper");
-  /* for (var idx = 0; idx < this.FrLst.length; idx++) {
-            var key = this.OpId;
-            var value = {
-                         count: 1,
-                         fare: this.FrLst[idx].qty
-                                       };
-                           emit(key, value);
-                       }*/
- //var fareSum = 0;
- //var par = JSON.parse(this.FrLst);
-  /*for(i=0;i<par.length;i++)
+if(this.OpId == this.OpId)
+{
+  // AC Fare 
+  if(this.IsAc)
   {
-    fareSum += parseInt(par[i]);
-    if(i == par.length-1)
+    op_AC_fare_sum = Array.sum(this.FrLst);
+  }
+
+  // Non AC Fare
+  if(!this.IsAc)
+  {
+    op_NAC_fare_sum = Array.sum(this.FrLst);
+  }
+
+ if(this.IsSlpr && !this.IsStr)
+  {
+    op_Slpr_fare_sum = Array.sum(this.FrLst);
+    oper_slp_count = this.FrLst.length;
+  }
+
+  if(this.IsSlpr && this.IsStr)
+  {
+    // The FrLst is sorted, we assume that the minimum amount is the fare of the seater remaining other fares are for sleeper ex: upper/lower
+    for(i=0;i<this.FrLst.length;i++)
     {
-        var value = {fareSum:fareSum};
-    emit(this.OpId, fareSum);
-}*/
+      if(i ==0 )
+      {
+        op_Str_fare_sum = this.FrLst[0];
+        oper_str_count = 1;
+      }
+      else
+      {
+        op_Slpr_fare_sum += this.FrLst[i] ;
+        oper_slp_count += 1;
+      }
+    }
+ 
+    
+  }
+
+ 
+  if(!this.IsSlpr )
+  {
+    op_Str_fare_sum = Array.sum(this.FrLst);
+    oper_str_count = this.FrLst.length;
+  }
+
+  op_fare_sum = Array.sum(this.FrLst);
+  oper_count = this.FrLst.length;
+
+}
+
+else
+{
+  // AC Fare 
+  if(this.IsAc)
+  {
+    other_op_AC_fare_sum = Array.sum(this.FrLst);
+  }
+
+  // Non AC Fare
+  if(!this.IsAc)
+  {
+    other_op_NAC_fare_sum = Array.sum(this.FrLst);
+  }
+
+   if(this.IsSlpr && !this.IsStr)
+  {
+    other_op_Slpr_fare_sum = Array.sum(this.FrLst);
+    other_oper_slp_count = this.FrLst.length;
+  }
+
+  if(this.IsSlpr && this.IsStr)
+  {
+    // The FrLst is sorted, we assume that the minimum amount is the fare of the seater remaining other fares are for sleeper ex: upper/lower
+    for(i=0;i<this.FrLst.length;i++)
+    {
+      if(i ==0 )
+      {
+        other_op_Str_fare_sum = this.FrLst[0];
+        other_oper_str_count = 1;
+      }
+      else
+      {
+        other_op_Slpr_fare_sum += this.FrLst[i];
+        other_oper_slp_count += 1;
+      }
+    }
+ 
+    
+  }
+
+ //semi sleeper is currently added as seater
+  if(!this.IsSlpr )
+  {
+    other_op_Str_fare_sum = Array.sum(this.FrLst);
+    other_oper_str_count = this.FrLst.length;
+  }
+  other_fare_sum = Array.sum(this.FrLst);
+  other_oper_count = this.FrLst.length;
+ 
+}
 
 var input = {
-     fare_sum:Array.sum(this.FrLst),
-     count:this.FrLst.length,
-     avg_fare: 0,
-     op_avg_fare:0
+   operId:operId,
+   op_AC_fare_sum:op_AC_fare_sum,
+   op_fare_sum:op_fare_sum,
+   other_fare_sum:other_fare_sum,
+   other_oper_count:other_oper_count,
+   oper_count:oper_count,
+   oper_avg_fare: 0,
+   other_oper_avg_fare:0,
+  op_AC_fare_sum : op_AC_fare_sum,
+  op_NAC_fare_sum :op_NAC_fare_sum,
+  op_Slpr_fare_sum : op_Slpr_fare_sum,
+  op_Str_fare_sum : op_Str_fare_sum,
+  other_op_AC_fare_sum : other_op_AC_fare_sum,
+  other_op_NAC_fare_sum :other_op_NAC_fare_sum,
+  other_op_Slpr_fare_sum : other_op_Slpr_fare_sum,
+  other_op_Str_fare_sum : other_op_Str_fare_sum,
+  oper_slp_count:oper_slp_count,
+  oper_str_count:oper_str_count,
+  other_oper_slp_count:other_oper_slp_count,
+  other_oper_str_count:other_oper_str_count 
     };
+
 emit(this.OpId, input);
   }
 
@@ -87,38 +166,51 @@ emit(this.OpId, input);
 var reduce = function(key, values) {
 
 
-  var r = { fare_sum:0,count: 0, avg_fare: 0 };
+  var r = { op_fare_sum:0,oper_count: 0, oper_avg_fare: 0 ,other_fare_sum:0,other_oper_count: 0, other_oper_avg_fare: 0,  op_AC_fare_sum : 0,
+  op_NAC_fare_sum :0,
+  op_Slpr_fare_sum : 0,
+  op_Str_fare_sum : 0,
+  other_op_AC_fare_sum : 0,
+  other_op_NAC_fare_sum :0,
+  other_op_Slpr_fare_sum : 0,
+  other_op_Str_fare_sum : 0,
+  oper_slp_count:0,
+  oper_str_count:0,
+  other_oper_slp_count:0,
+  other_oper_str_count:0 };
+
+
   for(var i in values) {
    // var fare = 0;
-    r.fare_sum += values[i].fare_sum;
-      r.count += values[i].count;
-
-/*for(j=0;j<values[i].FrLst.length;j++)
-{
-
-    //r.fare_sum += values[i].frLst[j];
-    r.fare_sum +=parseInt(values[i].frLst[j]);
-    r.count += 1;
-}
-  
- /* values.forEach(function(v) {
-   // v.forEach(function(i)
-    //{ 
-                r.ap_sum += v;
-
-    //});
-
-    
-    //console.log("reducer");*/
-
+    r.op_fare_sum += values[i].op_fare_sum;
+    r.other_fare_sum += values[i].other_fare_sum;
+    r.oper_count += values[i].oper_count;
+    r.other_oper_count += values[i].other_oper_count;
+    r.operId = values[i].operId;
+    r.op_AC_fare_sum += values[i].op_AC_fare_sum;
+    r.op_NAC_fare_sum +=values[i].op_NAC_fare_sum;
+    r.op_Slpr_fare_sum += values[i].op_Slpr_fare_sum;
+    r.op_Str_fare_sum  += values[i].op_Str_fare_sum;
+    r.other_op_AC_fare_sum += values[i].other_op_AC_fare_sum;
+    r.other_op_NAC_fare_sum +=values[i].other_op_NAC_fare_sum;
+    r.other_op_Slpr_fare_sum += values[i].other_op_Slpr_fare_sum;
+    r.other_op_Str_fare_sum += values[i].other_op_Str_fare_sum;
+    r.oper_slp_count +=values[i].oper_slp_count;;
+    r.oper_str_count +=values[i].oper_str_count;;
+    r.other_oper_slp_count +=values[i].other_oper_slp_count;;
+    r.other_oper_str_count +=values[i].other_oper_str_count;;
   }
+
   return r;
 }
 
 var finalize = function(key, value) {
-  if (value.count > 0) {
+  if (value.oper_count > 0) {
    // console.log("reducer");
-    value.avg_fare = value.fare_sum / value.count;
+    value.oper_avg_fare = value.op_fare_sum / value.oper_count;
+  }
+  if (value.other_oper_count > 0) {
+    value.other_oper_avg_fare = value.other_fare_sum / value.other_oper_count;
   }
   return value;
 }
@@ -128,6 +220,7 @@ model.mapReduce({
   map: map,
   reduce: reduce,
   //query:{OpId:6},
+  scope:{operId:operId},
   out: { reduce: "session_stat" },
   finalize: finalize,verbose: true  
 }, function(err, ret,stats){ 
