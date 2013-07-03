@@ -10,6 +10,8 @@ var operId = 6;
 var schema = mongoose.Schema({ key: String});
 var model = mongoose.model("rbroutes", schema);
 
+exports.getFareData = getFareData;
+
 map = function() {
   op_AC_fare_sum = 0;
   op_NAC_fare_sum =0;
@@ -265,13 +267,12 @@ var finalize = function(key, value) {
   return value;
 }
 
-//mongoose.connection.db.executeDbCommand({
 /*model.mapReduce({
   map: map,
   reduce: reduce,
   //query:{OpId:6},
   scope:{operId:operId},
-  out: { reduce: "session_stat" },
+  out: { replace: "session_stat" },
   finalize: finalize,verbose: true  
 }, function(err, ret,stats){ 
   if (err) console.log(err)
@@ -280,44 +281,46 @@ var finalize = function(key, value) {
 
 }
     })*/
-  
 
-getFareData()
+
+  
 function aggregateRecords(modelName,matchString,callback)
 {
-    //var ms = { IsAc: false };
-    logger.logMsg("Entering aggregateRecords");
+    //logger.logMsg("Entering aggregateRecords",matchString);
     var model = mongoose.model(modelName, schema);
     var fareAvg = 0;
     model.aggregate([
-        //{ $match:  matchString},
-         { $unwind : "$FrLst" },
+        { $match:  matchString},
+        { $unwind : "$FrLst" },
         { $group: {
             _id: {
                 "OpId" : "$OpId",
                 "source" : "$source",
                 "destination": "$destination",
-                "doj" : "$doj"
+                "doj" : "$doj",
             },
-            fareAvg: { $avg: '$FrLst'}
+            fareAvg: { $avg: '$FrLst'},
+            slprs: {$push: '$IsSlpr'},
+            ac: {$push: '$IsAc'},
+            fare: {$push: '$FrLst'}
         }}
 
     ], function (err, res) {
         if (err) {
             logger.logMsg(err);
         } else {
-            logger.logMsg("FareAvg",res);
+            //logger.logMsg("FareAvg",res);
            callback(null,res);
         }
-    }
-);
+    });
 }
 
-
-function getFareData(callback)
+//getFareData(39,null);
+function getFareData(OperatorId,matchString,callback)
 {
-    //var matchString = { IsAc: false, OpId : OperatorId };
-    var opFareAvg = aggregateRecords("rbroutes",null,function(err,res){
+   //var matchString = { IsAc: true, OpId : parseInt(OperatorId) };
+   //logger.logMsg("Entering getFareData",matchString);
+    var opFareAvg = aggregateRecords("rbroutes",matchString,function(err,res){
         if(err)
         {
             logger.logMsg(err,"Error retrieving fare");
@@ -325,8 +328,8 @@ function getFareData(callback)
         else
         {
 
-
-            for (var i=0; i<res.length; i++)
+          callback(null,res);
+            /*for (var i=0; i<res.length; i++)
             {
                // var json = JSON.parse(res[i]);
                   logger.logMsg("res[i] ",res[i]);
