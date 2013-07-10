@@ -1,14 +1,9 @@
 var logger=require('./logger.js');
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-cfg = require('./config.js').config;
-db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
+var mongo = require('./mongoDb.js');
 var hashes = require('hashes');
 var operId = 6;
 
 //default schema
-var schema = mongoose.Schema({ key: String});
-var model = mongoose.model("rbroutes", schema);
 
 exports.getFareData = getFareData;
 
@@ -287,7 +282,8 @@ var finalize = function(key, value) {
 function aggregateRecords(modelName,matchString,callback)
 {
     //logger.logMsg("Entering aggregateRecords",matchString);
-    var model = mongoose.model(modelName, schema);
+    var model = mongo.returnModel("rbroutes");
+    //var model = mongoose.model(modelName, schema);
     var fareAvg = 0;
     model.aggregate([
         { $match:  matchString},

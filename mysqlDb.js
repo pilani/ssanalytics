@@ -4,10 +4,10 @@ exports.queryMysqlDb = queryMysqlDb;
 exports.queryMysqlDbWithKey = queryMysqlDbWithKey;
 
 var connection = mysql.createConnection({
-  host     : 'ss-db-staging.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
-  user     : 'ss_master_user',
-  password : 'BackupInstance456',
-  database: 'sstru1',
+  host     : 'ss-prod.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
+  user     : 'readonlyuser',
+  password : 'slowWork',
+  database: 'ssprod',
 });
 
 /*var connection = mysql.createConnection({
@@ -49,7 +49,7 @@ connection.query(queryString, function(err, res){
 			//console.log("records");
 			//writeToSSADb(rows)
 			//connection.destroy();
-			//console.log(res);
+			console.log(res.length);
 		    callback(null,res);
 			//connection.destroy();
 			//console.log('connection ended');

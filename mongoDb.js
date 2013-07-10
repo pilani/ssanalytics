@@ -15,6 +15,9 @@ exports.queryCollection = queryCollection;
 exports.copyRecord = copyRecord;
 exports.insertColumns = insertColumns;
 exports.formInQuery = formInQuery;
+exports.aggregateRecords =aggregateRecords;
+exports.closeConnection =closeConnection;
+exports.returnModel =returnModel;
 
 //Testing
 exports.queryAndSortCollection = queryAndSortCollection;
@@ -25,6 +28,18 @@ db = mongoose.connect('mongodb://'+cfg["MONGO_URL"]);
 
 //default schema
 var schema = mongoose.Schema({ key: String});
+
+function closeConnection()
+{
+	db.connection.close();
+}
+
+function returnModel(modelName,callback)
+{
+	var model = mongoose.model(modelName, schema);
+	return model;
+}
+
 
 
 function createNewModel(modelName,callback)
@@ -85,7 +100,7 @@ function insertRecords(modelName,rowsSetToBeInserted,callback)
 	{
       if(err)
       {
-      	logger.logMsg(err,"Error inserting records" + rowsSetToBeInserted + "into model" + modelName);
+      	logger.logMsg(err,"Error inserting records");
       }
       else
       {
@@ -282,6 +297,84 @@ var fieldValues = "";
 	queryString = queryString + fieldValues + ' ] } }'
 	return queryString;
 	//logger.logMsg("queryString",queryString);
+}
+
+
+function aggregateRecords(modelName,matchString,groupByString, unwindString,callback)
+{
+    //logger.logMsg("Entering aggregateRecords",matchString);
+    var model = mongoose.model(modelName, schema);
+
+    if(matchString != null && unwindString!= null)
+    {
+    	 model.aggregate([
+        { $match:   matchString},
+        { $unwind : unwindString},
+        { $group: groupByString}
+
+    ], function (err, res) {
+        if (err) {
+            logger.logMsg(err);
+        } else {
+            //logger.logMsg("FareAvg",res);
+           callback(null,res);
+        }
+    });
+    }
+
+    else if (matchString == null && unwindString != null)
+    {
+    	 	 model.aggregate([
+        { $unwind : unwindString},
+        { $group: groupByString}
+
+    ], function (err, res) {
+        if (err) {
+            logger.logMsg(err);
+        } else {
+            //logger.logMsg("FareAvg",res);
+           callback(null,res);
+        }
+    });
+
+    }
+
+    else if (matchString != null && unwindString == null)
+    {
+
+    	model.aggregate([
+    	{ $match:  matchString},
+        { $group: groupByString}
+
+    ], function (err, res) {
+        if (err) {
+            logger.logMsg(err);
+        } else {
+            //logger.logMsg("FareAvg",res);
+           callback(null,res);
+        }
+    });
+
+    }
+
+        else
+    {
+    	model.aggregate([
+        { $group: groupByString}
+
+    ], function (err, res) {
+        if (err) {
+            logger.logMsg(err);
+        } else {
+            //logger.logMsg("FareAvg",res);
+           callback(null,res);
+        }
+    });
+
+    }
+
+
+   
 }
 
 
