@@ -3,19 +3,20 @@ var mysql = require('mysql');
 exports.queryMysqlDb = queryMysqlDb;
 exports.queryMysqlDbWithKey = queryMysqlDbWithKey;
 
-var connection = mysql.createConnection({
-  host     : 'ss-prod.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
-  user     : 'readonlyuser',
-  password : 'slowWork',
-  database: 'ssprod',
-});
-
 /*var connection = mysql.createConnection({
-  host     : 'ss-prod.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
+  host     : 'ss-db-staging.csqxivzy0twu.ap-southeast-1.rds.amazonaws.com',
+  user     : 'ss_master_user',
+  password : 'BackupInstance456',
+  database: 'sstru1',
+});*/
+
+var connection = mysql.createConnection({
+  host     : '54.251.8.50',
   user     : 'readonlyuser',
   password : 'slowWork',
   database: 'ssprod',
-});*/
+  port:3307,
+});
 
 
 connection.connect(function(err)

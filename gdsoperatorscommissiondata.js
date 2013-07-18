@@ -64,14 +64,14 @@ function consolidatedOperatorCommissionQuery(modelname,src,dest,doj,fromdate,tod
 
 
 //consolidatedOperatorCommissionQuery(4663,'2013-06-27',null,null);
-//operatorCommission(4663,'2013-06-27',null,null);
+//operatorCommission(4794,new Date('2013-07-06'),null,null);
 function operatorCommission(OperatorId,dateofjourney,from_date,to_date,callback)
 {
+	logger.logMsg("OperatorId",OperatorId);
+	//logger.logMsg("dateofjourney",dateofjourney);
 	var model = mongo.returnModel("gdsprodrecords");
-	var toDate = new Date(dateofjourney);
-	toDate.setDate(toDate.getDate() + 1);
-	 //,fromDate:{ $lte : new Date(dateofjourney)}  
     var matchString = {todate : { $gte : new Date(dateofjourney)}, fromdate:{ $lt : new Date(dateofjourney)}, operatorId:OperatorId };
+    //logger.logMsg("matchString",matchString);
     var groupByString =  {
             _id: {
                 "source" : "\$source",
@@ -88,7 +88,7 @@ function operatorCommission(OperatorId,dateofjourney,from_date,to_date,callback)
 	        if (err) {
 	            logger.logMsg(err);
 	        } else {
-	           //logger.logMsg("Res",JSON.stringify(res));
+	           logger.logMsg("Res",JSON.stringify(res));
 	           callback(null,res);
 	        }
 	    });
@@ -115,7 +115,6 @@ function operatorCommission(OperatorId,dateofjourney,from_date,to_date,callback)
 	model.aggregate([
 	    { $match : matchString},
 	    { $sort : { bonusCommission : -1}},
-		{ $limit :1},
 	    { $group : groupByString}
 
 	    ], function (err, res) {
@@ -131,13 +130,13 @@ function operatorCommission(OperatorId,dateofjourney,from_date,to_date,callback)
   }
 
 
-//getAverageAgentCountForOthers(6,'2013-06-06');
+//getAverageAgentCount(4794,'2013-07-07');
 
 function getAverageAgentCount(OperatorId,dateofjourney,callback)
 {
 	var toDate = new Date(dateofjourney);
 	toDate.setDate(toDate.getDate() + 1);
-    var matchString = { operator:6,doj : { $gte : new Date(dateofjourney), $lt : new Date(toDate) }  };
+    var matchString = { operatorId:OperatorId,doj : { $gte : new Date(dateofjourney), $lt : new Date(toDate) }  };
     var groupByString =  {
             _id: {
                 "source" : "\$source",
@@ -153,7 +152,7 @@ function getAverageAgentCount(OperatorId,dateofjourney,callback)
         if (err) {
             logger.logMsg(err);
         } else {
-            //logger.logMsg("countAvg",res);
+            logger.logMsg("countAvg",res);
           	callback(null,res);
         }
     });
@@ -164,7 +163,7 @@ function getAverageAgentCountForOthers(OperatorId,dateofjourney,callback)
 {
 	var toDate = new Date(dateofjourney);
 	toDate.setDate(toDate.getDate() + 1);
-    var matchString = { operator: {$ne : OperatorId},doj : { $gte : new Date(dateofjourney), $lt : new Date(toDate) }  };
+    var matchString = { operatorId: {$ne : OperatorId},doj : { $gte : new Date(dateofjourney), $lt : new Date(toDate) }  };
     var groupByString =  {
             _id: {
                 "source" : "\$source",

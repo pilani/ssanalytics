@@ -13,10 +13,10 @@ var newQueryString='';
 var findQuery = "";
 var queryString = "";
 
-//agentData();
+agentData();
 
 
-async.waterfall(
+/*async.waterfall(
 
 	[ setModelName,mongo.createNewModel,setGdsCampaignQuery,setQueryString,queryingMysql,mongo.insertRecords],function(err,res)
 	{
@@ -31,14 +31,14 @@ async.waterfall(
 			//console.log("Res :%j", res[0]);
 		}
 		
-	});
+	});*/
 
 function agentData()
 {
 	modelName = "operatorsalesfromagents"
 	async.waterfall(
 
-	[setModelName,mongo.createNewModel,setOperatorTicketSalesQuery,setQueryString,queryingMysql,mongo.insertRecords],function(err,res)
+	[setModelNameForSales,mongo.createNewModel,setOperatorTicketSalesQuery,setQueryString,queryingMysql,mongo.insertRecords],function(err,res)
 	{
 		if(err)
 		{
@@ -55,11 +55,6 @@ function agentData()
 
 }
 
-
-
-
-
-
 function setQueryString(modelName,queryString,callback)
 {	
 	var query = queryString;
@@ -69,7 +64,7 @@ function setQueryString(modelName,queryString,callback)
 
 function setOperatorTicketSalesQuery(res,callback)
 {
-	queryString = 'SELECT COUNT(a.account) AS numOfAgents,a.operator,a.boAccount,a.doj,b.rbMasterId AS source,c.rbMasterId AS destination FROM ticket_itineraryleg a JOIN  sslocation_region b JOIN  sslocation_region c ON (a.sourceCityId = b.id AND a.destinationCityId = c.id) WHERE doj > \'2013-06-01\' GROUP BY a.boAccount,a.sourceCityId,a.destinationCityId,a.doj';
+	queryString = 'SELECT COUNT(a.account) AS numOfAgents,a.operator  AS operatorId,a.boAccount,a.doj,b.rbMasterId AS source,c.rbMasterId AS destination FROM ticket_itineraryleg a JOIN  sslocation_region b JOIN  sslocation_region c ON (a.sourceCityId = b.id AND a.destinationCityId = c.id) WHERE doj > \'2013-06-01\' GROUP BY a.boAccount,a.sourceCityId,a.destinationCityId,a.doj';
 	//logger.logMsg('queryString',queryString);
 	callback(null,modelName,queryString);
 }
@@ -85,6 +80,14 @@ function setGdsCampaignQuery(res,callback)
 function setModelName(callback)
 {
 	modelName = 'gdsprodrecords';
+	logger.logMsg('modelName',modelName);
+	callback(null,modelName);
+}
+
+
+function setModelNameForSales(callback)
+{
+	modelName = 'operatorsalesfromagents';
 	logger.logMsg('modelName',modelName);
 	callback(null,modelName);
 }

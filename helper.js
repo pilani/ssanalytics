@@ -10,14 +10,9 @@ exports.getOperatorCommission = getOperatorCommission;
 exports.getOtherOperatorCommission = getOtherOperatorCommission;
 exports.getAverageAgentCountForOthers = getAverageAgentCountForOthers;
 exports.getAverageAgentCount = getAverageAgentCount;
-var HashMap = require('hashmap').HashMap;
-var map = new HashMap();
-var innerMap = new HashMap();
 
-var matchString = "";
-var key = "";
 
-function processMap(key,record,type,operatorId,doj)
+/*function processMap(key,record,type,operatorId,doj)
 {
 	var key  = record._id.source + "_" + record._id.destination + "_" + doj + "_" + operatorId;
    	if(map.get(key) == null)
@@ -105,7 +100,7 @@ function processMap(key,record,type,operatorId,doj)
    	logger.logMsg("map_key",key);
    	logger.logMsg("map_value",map.get(key));
    }
-}
+}*/
 
 function getAcFareAvgForOperator(operatorId,doj,callback)
 {
@@ -120,8 +115,10 @@ function getAcFareAvgForOperator(operatorId,doj,callback)
 	}
 	else
 	{
+		logger.logMsg("res_Ac",JSON.stringify(res));
+		callback(null,res);
 		//logger.logMsg("res",res[0]);
-		for(i=0;i<res.length;i++)
+		/*for(i=0;i<res.length;i++)
 		{
 		    key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"AC",operatorId,doj);
@@ -130,7 +127,7 @@ function getAcFareAvgForOperator(operatorId,doj,callback)
 			{
 					callback(null,map,res);
 			}
-		}
+		}*/
 	
 	}
 });
@@ -150,7 +147,9 @@ function getNonAcFareAvgForOperator(operatorId,doj,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		logger.logMsg("res_NAc",JSON.stringify(res));
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"NAC",operatorId,doj);
@@ -159,7 +158,7 @@ function getNonAcFareAvgForOperator(operatorId,doj,callback)
 			{
 					callback(null,map,res);
 			}
-		}
+		}*/
 	}
 });
 
@@ -178,7 +177,8 @@ function getSlprFareAvgForOperator(operatorId,doj,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"Slpr",operatorId,doj);
@@ -187,7 +187,7 @@ function getSlprFareAvgForOperator(operatorId,doj,callback)
 			{
 				callback(null,map,res);
 			}
-		}
+		}*/
 	}
 });
 
@@ -205,7 +205,8 @@ function getStrFareAvgForOperator(operatorId,doj,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"Str",operatorId,doj);
@@ -214,7 +215,7 @@ function getStrFareAvgForOperator(operatorId,doj,callback)
 			{
 					callback(null,map,res);
 			}
-		}
+		}*/
 	}	
 });
 
@@ -232,7 +233,9 @@ function getOperatorCommission(operatorId,doj,fromDate,toDate,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		logger.logMsg(res,"res");
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"OpCOM",operatorId,doj);
@@ -241,7 +244,7 @@ function getOperatorCommission(operatorId,doj,fromDate,toDate,callback)
 			{
 				callback(null,map,res);
 			}
-		}
+		}*/
 	}	
 });
 
@@ -258,7 +261,8 @@ function getOtherOperatorCommission(operatorId,doj,fromDate,toDate,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.source + "_" + res[i]._id.destination + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"OtOpCOM",operatorId,doj);
@@ -267,7 +271,7 @@ function getOtherOperatorCommission(operatorId,doj,fromDate,toDate,callback)
 			{
 				callback(null,map,res);
 			}
-		}
+		}*/
 	}	
 });
 
@@ -284,7 +288,8 @@ function getAverageAgentCountForOthers(operatorId,doj,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.sourceCity + "_" + res[i]._id.destinationCity + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"OtAvgAgtSum",operatorId,doj);
@@ -293,7 +298,7 @@ function getAverageAgentCountForOthers(operatorId,doj,callback)
 			{
 				callback(null,map,res);
 			}
-		}
+		}*/
 	}	
 });
 
@@ -310,7 +315,8 @@ function getAverageAgentCount(operatorId,doj,callback)
 	}
 	else
 	{
-		for(i=0;i<res.length;i++)
+		callback(null,res);
+		/*for(i=0;i<res.length;i++)
 		{
 			key  = res[i]._id.sourceCity + "_" + res[i]._id.destinationCity + "_" + doj + "_" + operatorId;
 			processMap(key,res[i],"AvgAgtSum",operatorId,doj);
@@ -319,7 +325,7 @@ function getAverageAgentCount(operatorId,doj,callback)
 			{
 				callback(null,map,res);
 			}
-		}
+		}*/
 	}	
 });
 
